@@ -1,0 +1,124 @@
+// ===== Caesar Bot - Highrise =====
+const BOT_API = "d682211e49d0d6d3e8afa6bf6c3ed09a90550c9d2eafdcc2b160317eeca3c5e4";
+const ROOM_ID = "68796199e8769ee983725d71";
+const owner = "YOHAN.RSX"; // ton pseudo
+let vipList = []; // liste des VIP autorisés
+
+// 500 émotions uniques
+const emotions = {
+1: "💎 Je brille comme le diamant le plus pur !",
+2: "👑 La royauté coule dans mes veines.",
+3: "✨ Une étincelle de luxe illumine ma journée.",
+4: "🎶 Les notes dorées dansent autour de moi.",
+5: "🥂 À la vie et au prestige !",
+6: "🌟 Je rayonne comme une étoile du soir.",
+7: "💍 Mon élégance est un trésor rare.",
+8: "🕊️ La sérénité luxueuse m’enveloppe.",
+9: "🏛️ Je marche comme dans un palais antique.",
+10: "🎇 Mon aura éclaire toute la salle.",
+11: "🖤 Mystérieux et sophistiqué.",
+12: "🧿 Protégé par le luxe et la chance.",
+13: "🔥 Mon charisme enflamme la pièce.",
+14: "💫 Une brillance subtile mais infinie.",
+15: "🎩 Élégance et style dans chaque geste.",
+16: "🛡️ Mon prestige est mon armure.",
+17: "🌹 Chaque instant est une fleur rare.",
+18: "💌 Mon message est un bijou de mots.",
+19: "🏆 Je suis au sommet du raffinement.",
+20: "🪞 Mon reflet respire le luxe.",
+21: "🪄 Une magie d’opulence m’entoure.",
+22: "🎨 Mon style est une œuvre d’art.",
+23: "🛋️ Confort et splendeur à chaque pas.",
+24: "📿 Mon aura attire respect et admiration.",
+25: "🕰️ Le temps lui-même s’incline devant moi.",
+26: "🪙 Chaque geste est une pièce précieuse.",
+27: "🏰 Mon royaume s’étend dans la salle.",
+28: "🌈 Les couleurs du luxe me suivent partout.",
+29: "🗝️ Je détiens la clé de l’élégance.",
+30: "🛍️ Chaque mouvement respire la richesse.",
+31: "🎯 Je frappe toujours dans le mille du style.",
+32: "💨 Mon passage laisse une traînée d’or.",
+33: "🖼️ Mon aura est digne d’un musée.",
+34: "🧸 Douceur et prestige réunis.",
+35: "🦚 Je déploie mon charme avec grâce.",
+36: "📜 Mon nom s’écrit en lettres dorées.",
+37: "🕯️ Une lumière raffinée m’entoure.",
+38: "🎻 La musique du luxe suit mes pas.",
+39: "🛡️ Mon charisme est invincible.",
+40: "🌌 Je brille dans l’infini de la splendeur.",
+41: "🦢 La grâce personnifiée est ma marque.",
+42: "🏹 Mon élégance vise toujours la perfection.",
+43: "🌿 Raffinement et sérénité se rencontrent en moi.",
+44: "💼 Mon prestige est mon atout principal.",
+45: "🧩 Je complète le puzzle du style parfait.",
+46: "📸 Chaque mouvement est digne d’un cliché luxueux.",
+47: "💐 Je sème des fleurs de raffinement.",
+48: "🪞 Mon reflet inspire l’admiration.",
+49: "🪶 La légèreté et le prestige m’accompagnent.",
+50: "💍 Mon nom brille au mur comme un bijou.",
+// … continue jusqu’à 500
+500: "👑 Le summum du luxe m’appartient, rien ne peut égaler ma grandeur !"
+};
+
+// ===== Fonction principale =====
+function caesarBot(message, user) {
+    message = message.toLowerCase();
+
+    // Ajouter un VIP (seulement le propriétaire)
+    if (message.startsWith("add vip @") && user === owner) {
+        const newVIP = message.split("@")[1].trim();
+        if (!vipList.includes(newVIP)) {
+            vipList.push(newVIP);
+            return `💎 ${newVIP} a été ajouté comme VIP !`;
+        } else {
+            return `⚠️ ${newVIP} est déjà VIP.`;
+        }
+    }
+
+    // Accès VIP
+    if (message === "vip") {
+        if (user === owner || vipList.includes(user)) {
+            teleportToVIP(user);
+            return `✨ ${user} est téléporté dans le niveau VIP !`;
+        } else {
+            return `⛔ ${user}, vous n'êtes pas autorisé à accéder au VIP.`;
+        }
+    }
+
+    // Gestion des chiffres 1-500
+    const chiffre = parseInt(message);
+    if (!isNaN(chiffre) && chiffre >= 1 && chiffre <= 500) {
+        return `<#800000> bienvenue dans la salle du plaisir 🥰🤝
+${emotions[chiffre]}`;
+    }
+
+    return null; // messages non pris en charge
+}
+
+// ===== Fonction de téléport (à compléter avec API) =====
+function teleportToVIP(user) {
+    console.log(`API: téléportation de ${user} dans le VIP`);
+    // ici tu feras la requête POST vers Highrise avec ROOM_ID et BOT_API
+}
+
+// ===== Boucle pour rester actif =====
+const axios = require('axios');
+async function checkMessages() {
+    try {
+        const res = await axios.get(`https://api.highrisegame.com/rooms/${ROOM_ID}/messages?bot=${BOT_API}`);
+        const messages = res.data;
+
+        messages.forEach(msg => {
+            const response = caesarBot(msg.text, msg.user);
+            if(response) {
+                axios.post(`https://api.highrisegame.com/rooms/${ROOM_ID}/messages?bot=${BOT_API}`, { text: response });
+            }
+        });
+    } catch(e) {
+        console.error("Erreur API:", e.message);
+    }
+    setTimeout(checkMessages, 2000);
+}
+
+// ===== Démarrage =====
+checkMessages();
